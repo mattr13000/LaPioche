@@ -106,7 +106,8 @@ function gameCard(game) {
   if (game.isAvailable) {
     actions.append(button("Emprunter", () => openBorrowDialog(game), "primary"));
   }
-
+  actions.append(button("Modifier", () => openBorrowDialog(game), "primary"));
+  actions.append(button("Supprimer", () => openBorrowDialog(game), "primary"));
   return el(
     "li",
     { class: "card" },
