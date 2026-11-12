@@ -95,6 +95,49 @@ async function loadGames() {
   $("#games-list").replaceChildren(...games.map(gameCard));
 }
 
+// --- UPDATE
+const updateGameDialog = $("#update-game-dialog");
+const updateGameForm = $("#update-game-form");
+let editedGame = null;
+
+function openUpdateGameDialog(game) {
+  editedGame = game;
+  $("#update-title", updateGameForm).value = game.title;
+  $("#update-minPlayers", updateGameForm).value = game.minPlayers;
+  $("#update-maxPlayers", updateGameForm).value = game.maxPlayers;
+  $("#update-durationMinutes", updateGameForm).value = game.durationMinutes;
+  
+  showFormError(updateGameDialog, null);
+  updateGameDialog.showModal();
+}
+
+bindSubmit(updateGameDialog, updateGameForm, (data) =>
+  api.updateGame(editedGame.id, {
+    title: data.get("title").trim(),
+    minPlayers: Number(data.get("minPlayers")),
+    maxPlayers: Number(data.get("maxPlayers")),
+    durationMinutes: Number(data.get("durationMinutes")),
+  }),
+);
+
+// --- DELETE
+
+const deleteGameDialog = $("#delete-game-dialog");
+const deleteGameForm = $("#delete-game-form");
+let deletedGame = null;
+
+
+function openDeleteDialog(game) {
+    deletedGame = game;
+    $("#delete-game-dialog-title").textContent = `Supprimer « ${game.title} »`;
+    showFormError(deleteGameDialog, null);
+    deleteGameDialog.showModal();
+}
+
+bindSubmit(deleteGameDialog, deleteGameForm, () => 
+  api.deleteGame(deletedGame.id)
+);
+
 function gameCard(game) {
   const players =
     game.minPlayers === game.maxPlayers ? `${game.minPlayers}` : `${game.minPlayers} à ${game.maxPlayers}`;
@@ -105,8 +148,10 @@ function gameCard(game) {
   const actions = el("div", { class: "actions" });
   if (game.isAvailable) {
     actions.append(button("Emprunter", () => openBorrowDialog(game), "primary"));
+    actions.append(button("Modifier", () => openUpdateGameDialog(game), "primary"));
+    actions.append(button("Supprimer", () => openDeleteDialog(game), "primary"));
   }
-
+  
   return el(
     "li",
     { class: "card" },

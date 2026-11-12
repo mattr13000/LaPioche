@@ -47,6 +47,14 @@ test("borrow sends the game and the member", async () => {
   assertEqual(calls[0].body, { gameID: "g1", memberID: "m1" });
 });
 
+test("deleteGame calls DELETE /games/:id and returns no content", async () => {
+  const { fetch, calls } = fakeApi({ "DELETE /games/g1": [204]});
+  const result = await withFakeFetch(fetch, () => api.deleteGame("g1"));
+  assertEqual(`${calls[0].method} ${calls[0].path}`, "DELETE /games/g1");
+  assertEqual(result, null);
+});
+
+
 // --- erreurs
 
 // Attend qu'une promesse échoue et renvoie l'erreur (échoue si elle réussit).
@@ -74,4 +82,12 @@ test("a game already on loan (409) gives a French message", async () => {
   assertTrue(error instanceof ApiError, "l'erreur devrait être une ApiError");
   assertEqual(error.status, 409);
   assertEqual(error.message, "Ce jeu est déjà emprunté : il faut d'abord le rendre.");
+});
+
+test("deleteGame calls DELETE /games/:id with a bad id and returns not found", async () => {
+  const { fetch } = fakeApi({ "DELETE /games/g12": [404, { error: true, reason: "Game not found" }] });
+  const error = await expectError(withFakeFetch(fetch, () => api.deleteGame("g12")));
+  assertTrue(error instanceof ApiError, "l'erreur devrait être une ApiError");
+  assertEqual(error.status, 404);
+  assertEqual(error.message, "Ce jeu n'existe pas ou a déjà été supprimé.");
 });
