@@ -96,7 +96,7 @@ async function loadGames() {
 }
 
 async function deleteGame(game) {
-  api.deleteGame(game);
+  api.deleteGame(game.id);
   console.log(game)
   loadGames();
 }
