@@ -65,6 +65,17 @@ test("a validation error is shown in French and the dialog stays open", async ()
   assertTrue(app.$("#game-dialog").open, "la boîte devrait rester ouverte");
 });
 
+test("deleting a game sends a DELETE request and reloads the list", async () => {
+  const app = await mountApp({
+    "GET /games": [catan],
+    "DELETE /games/g1": [204, null],
+  });
+  await waitFor(() => app.$$("#games-list .card").length === 1);
+ 
+  app.click("Supprimer", cardOf(app, "Catan"));
+  await waitFor(() => app.calls.some((call) => call.method === "DELETE" && call.path === "/games/g1"), "l'appel DELETE /games/g1");
+});
+
 // --- Emprunts
 
 test("borrowing a game sends the game and the chosen member", async () => {
