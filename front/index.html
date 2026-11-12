@@ -98,6 +98,18 @@
     </form>
   </dialog>
 
+  <dialog id="delete-game-dialog">
+    <form method="dialog" id="delete-game-form">
+      <h2 id="delete-game-dialog-title"></h2>
+      <p class="hint">Êtes-vous sûr de vouloir supprimer ce jeu ?</p>
+      <p class="form-error" role="alert" hidden></p>
+      <div class="actions">
+        <button type="button" data-cancel>Annuler</button>
+        <button type="submit" class="primary">Emprunter</button>
+      </div>
+    </form>
+  </dialog>
+
   <div id="toasts" role="status" aria-live="polite"></div>
 
   <script type="module" src="app.js"></script>
