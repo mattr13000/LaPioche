@@ -2,17 +2,6 @@
 import XCTVapor
 
 final class LoanTests: XCTestCase {
-    private func borrow(
-        _ app: Application,
-        gameID: UUID,
-        memberID: UUID,
-        afterResponse: (XCTHTTPResponse) async throws -> Void
-    ) async throws {
-        try await app.test(.POST, "loans", beforeRequest: { req in
-            try req.content.encode(CreateLoanDTO(gameID: gameID, memberID: memberID))
-        }, afterResponse: afterResponse)
-    }
-
     func testBorrowGameReturnsCreated() async throws {
         try await withApp { app in
             let game = try await createGame(app)

@@ -84,3 +84,14 @@ func insertLoan(
     loan.returnedAt = returnedAt
     try await loan.save(on: app.db)
 }
+
+func borrow(
+    _ app: Application,
+    gameID: UUID,
+    memberID: UUID,
+    afterResponse: (XCTHTTPResponse) async throws -> Void
+) async throws {
+    try await app.test(.POST, "loans", beforeRequest: { req in
+        try req.content.encode(CreateLoanDTO(gameID: gameID, memberID: memberID))
+    }, afterResponse: afterResponse)
+}

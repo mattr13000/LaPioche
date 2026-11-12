@@ -82,4 +82,22 @@ final class MemberTests: XCTestCase {
             })
         }
     }
+    
+    func testMemberDeletionWithActiveLoan() async throws {
+        try await withApp { app in
+            let member = try await createMember(app)
+            let game = try await createGame(app)
+            let id = try XCTUnwrap(member.id)
+            try await borrow(app, gameID: try XCTUnwrap(game.id), memberID: id,
+                             afterResponse: {
+                res async throws in XCTAssertEqual(res.status, .created)
+            }
+            )
+            try await app.test(.DELETE, "members/\(id)", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .conflict)
+            })
+        }
+    }
+    
+
 }
