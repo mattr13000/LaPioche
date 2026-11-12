@@ -56,6 +56,13 @@ struct MemberController: RouteCollection {
         
         let newMember = try req.content.decode(UpdateMemberDTO.self)
         
+        let emailTaken = try await Member.query(on: req.db)
+            .filter(\.$email == newMember.email)
+            .count() > 0
+        guard !emailTaken else {
+            throw Abort(.conflict, reason: "A member with this email already exists")
+        }
+        
         member.name = newMember.name
         member.email = newMember.email
         
@@ -72,6 +79,16 @@ struct MemberController: RouteCollection {
         else {
             throw Abort(.notFound, reason: "Member not found")
         }
+        
+        let loanCount = try await Loan.query(on: req.db)
+            .filter(\.$member.$id == member.requireID())
+            .filter(\.$returnedAt == nil)
+            .count()
+
+        guard loanCount == 0 else {
+            throw Abort(.conflict, reason: "This member still has active loans")
+        }
+        
         try await member.delete(on: req.db)
         return .noContent
     }

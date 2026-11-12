@@ -5,7 +5,7 @@ struct CreateLoan: AsyncMigration {
         try await database.schema("loans")
             .id()
             .field("game_id", .uuid, .required, .references("games", "id"))
-            .field("member_id", .uuid, .required, .references("members", "id"))
+            .field("member_id", .uuid, .required, .references("members", "id", onDelete: .cascade))
             .field("borrowed_at", .datetime, .required)
             .field("due_at", .datetime, .required)
             .field("returned_at", .datetime)
