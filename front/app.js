@@ -95,6 +95,12 @@ async function loadGames() {
   $("#games-list").replaceChildren(...games.map(gameCard));
 }
 
+async function deleteGame(game) {
+  api.deleteGame(game);
+  console.log(game)
+  loadGames();
+}
+
 function gameCard(game) {
   const players =
     game.minPlayers === game.maxPlayers ? `${game.minPlayers}` : `${game.minPlayers} à ${game.maxPlayers}`;
@@ -140,10 +146,6 @@ bindSubmit(gameDialog, gameForm, (data) =>
 const borrowDialog = $("#borrow-dialog");
 const borrowForm = $("#borrow-form");
 let borrowedGame = null;
-
-async function deleteGame(game) {
-  api.deleteGame(game);
-}
 
 async function openBorrowDialog(game) {
   await run(async () => {
