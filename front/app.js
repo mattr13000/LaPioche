@@ -107,7 +107,7 @@ function gameCard(game) {
     actions.append(button("Emprunter", () => openBorrowDialog(game), "primary"));
   }
   actions.append(button("Modifier", () => openBorrowDialog(game), "primary"));
-  actions.append(button("Supprimer", () => openBorrowDialog(game), "primary"));
+  actions.append(button("Supprimer", () => deleteGame(game), "primary"));
   return el(
     "li",
     { class: "card" },
@@ -140,6 +140,10 @@ bindSubmit(gameDialog, gameForm, (data) =>
 const borrowDialog = $("#borrow-dialog");
 const borrowForm = $("#borrow-form");
 let borrowedGame = null;
+
+async function deleteGame(game) {
+  api.deleteGame(game);
+}
 
 async function openBorrowDialog(game) {
   await run(async () => {
