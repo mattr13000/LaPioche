@@ -83,6 +83,31 @@
     </form>
   </dialog>
 
+  <dialog id="update-member-dialog">
+    <form method="dialog" id="update-member-form" novalidate>
+      <h2>Modifier un·e adhérent·e</h2>
+      <label>Nom <input name="name" required></label>
+      <label>Adresse e-mail <input type="email" name="email" required></label>
+      <p class="form-error" role="alert" hidden></p>
+      <div class="actions">
+        <button type="button" data-cancel>Annuler</button>
+        <button type="submit" class="primary">Enregistrer</button>
+      </div>
+    </form>
+  </dialog>
+
+    <dialog id="delete-member-dialog">
+    <form method="dialog" id="delete-member-form">
+      <h2 id="delete-member-dialog-title"></h2>
+      <p class="hint">Êtes-vous sûr de vouloir supprimer cet utilisateur ?</p>
+      <p class="form-error" role="alert" hidden></p>
+      <div class="actions">
+        <button type="button" data-cancel>Annuler</button>
+        <button type="submit" class="primary">Supprimer</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="borrow-dialog">
     <form method="dialog" id="borrow-form">
       <h2 id="borrow-dialog-title"></h2>
@@ -105,7 +130,7 @@
       <p class="form-error" role="alert" hidden></p>
       <div class="actions">
         <button type="button" data-cancel>Annuler</button>
-        <button type="submit" class="primary">Emprunter</button>
+        <button type="submit" class="primary">Supprimer</button>
       </div>
     </form>
   </dialog>
