@@ -25,7 +25,7 @@ struct GameController: RouteCollection {
 
         let game = dto.toModel()
         try await game.save(on: req.db)
-        return try await game.toDTO().encodeResponse(for: req)
+        return try await game.toDTO().encodeResponse(status: .created, for: req)
     }
 
     @Sendable
