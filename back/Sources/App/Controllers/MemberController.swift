@@ -7,6 +7,8 @@ struct MemberController: RouteCollection {
         members.get(use: index)
         members.post(use: create)
         members.get(":memberID", use: show)
+        members.put(":memberID", use: update)
+        members.delete(":memberID", use: delete)
     }
 
     @Sendable
@@ -40,5 +42,37 @@ struct MemberController: RouteCollection {
             throw Abort(.notFound, reason: "Member not found")
         }
         return member.toDTO()
+    }
+    
+    @Sendable
+    func update(req: Request) async throws -> Response {
+        guard let memberID = req.parameters.get("memberID", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid game id")
+        }
+        guard let member = try await Member.find(memberID, on: req.db)
+        else {
+            throw Abort(.notFound, reason: "Member not found")
+        }
+        
+        let newMember = try req.content.decode(UpdateMemberDTO.self)
+        
+        member.name = newMember.name
+        member.email = newMember.email
+        
+        try await member.update(on: req.db)
+        return try await member.toDTO().encodeResponse(status: .ok, for: req)
+    }
+    
+    @Sendable
+    func delete(req: Request) async throws -> HTTPStatus {
+        guard let memberID = req.parameters.get("memberID", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid member id")
+        }
+        guard let member = try await Member.find(memberID, on: req.db)
+        else {
+            throw Abort(.notFound, reason: "Member not found")
+        }
+        try await member.delete(on: req.db)
+        return .noContent
     }
 }

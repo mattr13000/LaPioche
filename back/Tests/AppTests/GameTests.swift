@@ -109,7 +109,7 @@ final class GameTests: XCTestCase {
     func testGameUpdate() async throws {
         try await withApp { app in
             let gameToUpdate = try await createGame(app)
-            let newGame = createGameDTO()
+            let newGame = createUpdateGameDTO()
             let gameToUpdateId = try XCTUnwrap(gameToUpdate.id)
 
             try await app.test(

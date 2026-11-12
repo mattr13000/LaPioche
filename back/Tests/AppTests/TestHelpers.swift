@@ -34,7 +34,7 @@ func createGame(
     return try XCTUnwrap(game)
 }
 
-func createGameDTO(
+func createUpdateGameDTO(
     title: String = "Catan",
     minPlayers: Int = 3,
     maxPlayers: Int = Int.random(in: 4...10),
@@ -59,6 +59,16 @@ func createMember(
         member = try res.content.decode(MemberDTO.self)
     })
     return try XCTUnwrap(member)
+}
+
+func createUpdateMemberDTO(
+    name: String = "Didier",
+    email: String = "didier@gmail.com"
+) -> UpdateMemberDTO {
+    return UpdateMemberDTO(
+        name: name,
+        email: email
+    )
 }
 
 // The API cannot create a loan that is already late, so tests insert it directly.

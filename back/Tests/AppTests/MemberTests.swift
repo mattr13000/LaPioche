@@ -42,4 +42,44 @@ final class MemberTests: XCTestCase {
             })
         }
     }
+    
+    func testMemberUpdate() async throws {
+        try await withApp { app in
+            let memberToUpdate = try await createMember(app)
+            let newMember = createUpdateMemberDTO()
+            let memberToUpdateId = try XCTUnwrap(memberToUpdate.id)
+            try await app.test(
+                .PUT, "members/\(memberToUpdateId)",
+                beforeRequest: {
+                    req in try req.content.encode(newMember)
+                },
+                afterResponse: {
+                    res async throws in
+                    XCTAssertEqual(res.status, .ok)
+                }
+            )
+            
+            try await app.test(.GET, "members/\(memberToUpdateId)", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .ok)
+                let member = try res.content.decode(MemberDTO.self)
+                XCTAssertEqual(member.name, newMember.name)
+                XCTAssertEqual(member.email, newMember.email)
+            })
+        }
+    }
+    
+    func testMemberDeletion() async throws {
+        try await withApp { app in
+            let member = try await createMember(app)
+            let id = try XCTUnwrap(member.id)
+
+            try await app.test(.DELETE, "members/\(id)", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .noContent)
+            })
+            
+            try await app.test(.GET, "members/\(id)", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .notFound)
+            })
+        }
+    }
 }
