@@ -247,8 +247,8 @@ let editedMember = null;
 
 function openUpdateMemberDialog(member) {
   editedMember = member;
-  $("#update-name", updateMemberForm).value = member.name;
-  $("#update-email", updateMemberForm).value = member.email;
+  $('[name="update-name"]', updateMemberForm).value = member.name;
+  $('[name="update-email"]', updateMemberForm).value = member.email;
   
   showFormError(updateMemberDialog, null);
   updateMemberDialog.showModal();
@@ -256,8 +256,8 @@ function openUpdateMemberDialog(member) {
 
 bindSubmit(updateMemberDialog, updateMemberForm, (data) =>
   api.updateMember(editedMember.id, {
-    name: data.get("name").trim(),
-    email: data.get("email").trim(),
+    name: data.get("update-name").trim(),
+    email: data.get("update-email").trim(),
   }),
 );
 
