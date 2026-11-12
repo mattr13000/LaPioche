@@ -7,6 +7,8 @@ struct GameController: RouteCollection {
         games.get(use: index)
         games.post(use: create)
         games.get(":gameID", use: show)
+        games.put(":gameID", use: update)
+        games.delete(":gameID", use: delete)
     }
 
     @Sendable
@@ -45,5 +47,40 @@ struct GameController: RouteCollection {
             throw Abort(.notFound, reason: "Game not found")
         }
         return game
+    }
+    
+    @Sendable
+    func update(req: Request) async throws -> Response {
+        guard let gameID = req.parameters.get("gameID", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid game id")
+        }
+        guard let game = try await Game.find(gameID, on: req.db)
+        else {
+            throw Abort(.notFound, reason: "Game not found")
+        }
+        
+        let newGame = try req.content.decode(UpdateGameDTO.self)
+        try newGame.ensureConsistentPlayerCount()
+        
+        game.title = newGame.title
+        game.minPlayers = newGame.minPlayers
+        game.maxPlayers = newGame.maxPlayers
+        game.durationMinutes = newGame.durationMinutes
+        
+        try await game.update(on: req.db)
+        return try await game.toDTO().encodeResponse(status: .ok, for: req)
+    }
+    
+    @Sendable
+    func delete(req: Request) async throws -> HTTPStatus {
+        guard let gameID = req.parameters.get("gameID", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid game id")
+        }
+        guard let game = try await Game.find(gameID, on: req.db)
+        else {
+            throw Abort(.notFound, reason: "Game not found")
+        }
+        try await game.delete(on: req.db)
+        return .noContent
     }
 }
