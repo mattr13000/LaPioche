@@ -95,9 +95,36 @@ async function loadGames() {
   $("#games-list").replaceChildren(...games.map(gameCard));
 }
 
+const updateGameDialog = $("#update-game-dialog");
+const updateGameForm = $("#update-game-form");
+let editedGame = null;
+
+function openUpdateGameDialog(game) {
+  console.log(game);
+  editedGame = game;
+  $("#update-title", updateGameForm).value = game.title;
+  $("#update-minPlayers", updateGameForm).value = game.minPlayers;
+  $("#update-maxPlayers", updateGameForm).value = game.maxPlayers;
+  $("#update-durationMinutes", updateGameForm).value = game.durationMinutes;
+  
+  showFormError(updateGameDialog, null);
+  updateGameDialog.showModal();
+}
+
+bindSubmit(updateGameDialog, updateGameForm, (data) =>
+  api.updateGame(editedGame.id, {
+    title: data.get("title").trim(),
+    minPlayers: Number(data.get("minPlayers")),
+    maxPlayers: Number(data.get("maxPlayers")),
+    durationMinutes: Number(data.get("durationMinutes")),
+  }),
+);
+
 async function deleteGame(game) {
-  api.deleteGame(game.id);
-  refresh();
+  await run(async () => {
+    await api.deleteGame(game.id);
+    await refresh();
+  });
 }
 
 function gameCard(game) {
@@ -110,7 +137,7 @@ function gameCard(game) {
   const actions = el("div", { class: "actions" });
   if (game.isAvailable) {
     actions.append(button("Emprunter", () => openBorrowDialog(game), "primary"));
-    actions.append(button("Modifier", () => openBorrowDialog(game), "primary"));
+    actions.append(button("Modifier", () => openUpdateGameDialog(game), "primary"));
     actions.append(button("Supprimer", () => deleteGame(game), "primary"));
   }
   
