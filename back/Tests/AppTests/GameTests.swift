@@ -106,5 +106,42 @@ final class GameTests: XCTestCase {
         }
     }
     
+    func testGameUpdate() async throws {
+        try await withApp { app in
+            let gameToUpdate = try await createGame(app)
+            let newGame = createGameDTO()
+            let gameToUpdateId = try XCTUnwrap(gameToUpdate.id)
+
+            try await app.test(
+                .PUT, "games/\(gameToUpdateId)",
+                beforeRequest: {
+                    req in try req.content.encode(newGame)
+                },
+                afterResponse: {
+                    res async throws in
+                    XCTAssertEqual(res.status, .ok)
+                }
+            )
+            
+            try await app.test(.GET, "games/\(gameToUpdateId)", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .ok)
+                let game = try res.content.decode(GameDTO.self)
+                XCTAssertEqual(game.title, newGame.title)
+                XCTAssertEqual(game.minPlayers, newGame.minPlayers)
+                XCTAssertEqual(game.maxPlayers, newGame.maxPlayers)
+                XCTAssertEqual(game.durationMinutes, newGame.durationMinutes)
+            })
+        }
+    }
     
+    func testGameDeletion() async throws {
+        try await withApp { app in
+            let game = try await createGame(app)
+            let id = try XCTUnwrap(game.id)
+
+            try await app.test(.DELETE, "games/\(id)", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .noContent)
+            })
+        }
+    }
 }

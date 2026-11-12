@@ -59,7 +59,9 @@ struct GameController: RouteCollection {
             throw Abort(.notFound, reason: "Game not found")
         }
         
-        let newGame = try req.content.decode(Game.self)
+        let newGame = try req.content.decode(UpdateGameDTO.self)
+        try newGame.ensureConsistentPlayerCount()
+        
         game.title = newGame.title
         game.minPlayers = newGame.minPlayers
         game.maxPlayers = newGame.maxPlayers

@@ -17,8 +17,8 @@ func createGame(
     _ app: Application,
     title: String = "Catan",
     minPlayers: Int = 3,
-    maxPlayers: Int = 4,
-    durationMinutes: Int = 90
+    maxPlayers: Int = Int.random(in: 4...10),
+    durationMinutes: Int = Int.random(in: 30...120)
 ) async throws -> GameDTO {
     var game: GameDTO?
     try await app.test(.POST, "games", beforeRequest: { req in
@@ -32,6 +32,19 @@ func createGame(
         game = try res.content.decode(GameDTO.self)
     })
     return try XCTUnwrap(game)
+}
+
+func createGameDTO(
+    title: String = "Catan",
+    minPlayers: Int = 3,
+    maxPlayers: Int = Int.random(in: 4...10),
+    durationMinutes: Int = Int.random(in: 30...120),
+) -> UpdateGameDTO {
+    return UpdateGameDTO(
+        title: title,
+        minPlayers: minPlayers,
+        maxPlayers: maxPlayers,
+        durationMinutes: durationMinutes)
 }
 
 func createMember(
