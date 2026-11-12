@@ -68,6 +68,25 @@ final class MemberTests: XCTestCase {
         }
     }
     
+    func testMemberUpdateWithEmailConflict() async throws {
+        try await withApp { app in
+            let memberToUpdate = try await createMember(app)
+            _ = try await createMember(app, name: "Merise", email: "didier@gmail.com")
+            let newMember = createUpdateMemberDTO()
+            let memberToUpdateId = try XCTUnwrap(memberToUpdate.id)
+            try await app.test(
+                .PUT, "members/\(memberToUpdateId)",
+                beforeRequest: {
+                    req in try req.content.encode(newMember)
+                },
+                afterResponse: {
+                    res async throws in
+                    XCTAssertEqual(res.status, .conflict)
+                }
+            )
+        }
+    }
+    
     func testMemberDeletion() async throws {
         try await withApp { app in
             let member = try await createMember(app)
