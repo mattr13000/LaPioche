@@ -142,6 +142,10 @@ final class GameTests: XCTestCase {
             try await app.test(.DELETE, "games/\(id)", afterResponse: { res async throws in
                 XCTAssertEqual(res.status, .noContent)
             })
+            
+            try await app.test(.GET, "games/\(id)", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .notFound)
+            })
         }
     }
 }
