@@ -110,6 +110,7 @@ export const api = {
   listGames: () => request("GET", "/games"),
   createGame: (game) => request("POST", "/games", game),
   updateGame: (gameID, game) => request("PUT", `/games/${gameID}`, game),
+  showGame: (gameID) => request("GET", `/games/${gameID}`),
   deleteGame: (gameID) => request("DELETE", `/games/${gameID}`),
 
   listMembers: () => request("GET", "/members"),
@@ -118,4 +119,5 @@ export const api = {
   deleteMember: (memberID) => request("DELETE", `/members/${memberID}`),
 
   borrow: (gameID, memberID) => request("POST", "/loans", { gameID, memberID }),
+  returnLoan: (loanID) => request("POST", `/loans/${loanID}/return`),
 };

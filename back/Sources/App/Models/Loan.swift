@@ -51,3 +51,10 @@ extension Game {
         !($loans.value ?? []).contains { $0.returnedAt == nil }
     }
 }
+
+extension Game {
+    // Requires the `loans` relation to be loaded.
+    var currentLoanID: UUID? {
+        ($loans.value ?? []).first { $0.returnedAt == nil }?.id
+    }
+}
