@@ -238,6 +238,7 @@ function memberRow(member) {
   const actions = el("div", { class: "actions" });
   actions.append(button("Modifier", () => openUpdateMemberDialog(member), "primary"));
   actions.append(button("Supprimer", () => openDeleteMemberDialog(member), "primary"));
+  actions.append(button("Emprunts", () => openMemberBorrowsDialog(member), "primary"));
   return el(
     "li",
     { class: "row" },
@@ -257,6 +258,49 @@ $("#add-member").addEventListener("click", () => {
 bindSubmit(memberDialog, memberForm, (data) =>
   api.createMember({ name: data.get("name").trim(), email: data.get("email").trim() }),
 );
+
+// --- GET members/loans
+
+const memberBorrowsDialog = $("#member-borrows-dialog");
+const memberBorrowsTitle = $("#member-borrows-dialog-title");
+const memberBorrowsTbody = $("#member-borrows-tbody");
+let member = null;
+
+async function openMemberBorrowsDialog(m) {
+  member = m;
+  memberBorrowsTitle.textContent = `Emprunts de ${member.name}`;
+  showFormError(memberBorrowsDialog, null);
+  
+  memberBorrowsDialog.showModal();
+
+  try {
+    const loans = await api.getMemberLoans(member.id);
+
+    if (loans.length === 0) {
+      memberBorrowsTbody.innerHTML = '<tr><td colspan="4">Aucun emprunt.</td></tr>';
+      return;
+    }
+
+    const rows = await Promise.all(
+      loans.map(async (loan) => {
+        const game = await api.showGame(loan.gameID);
+        return `
+          <tr>
+            <td>${game.title}</td>
+            <td>${formatDate(loan.borrowedAt)}</td>
+            <td>${formatDate(loan.dueAt)}</td>
+            <td>${loan.returnedAt ? formatDate(loan.returnedAt) : "En cours"}</td>
+          </tr>
+        `;
+      })
+    );
+    memberBorrowsTbody.innerHTML = rows.join("");
+
+  } catch (err) {
+    memberBorrowsTbody.innerHTML = '<tr><td colspan="4">Erreur réseau.</td></tr>';
+    showFormError(memberBorrowsDialog, null);
+  }
+}
 
 // --- UPDATE
 

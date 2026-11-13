@@ -96,7 +96,7 @@
     </form>
   </dialog>
 
-    <dialog id="delete-member-dialog">
+  <dialog id="delete-member-dialog">
     <form method="dialog" id="delete-member-form">
       <h2 id="delete-member-dialog-title"></h2>
       <p class="hint">Êtes-vous sûr de vouloir supprimer cet utilisateur ?</p>
@@ -107,6 +107,28 @@
       </div>
     </form>
   </dialog>
+
+<dialog id="member-borrows-dialog">
+  <form method="dialog" id="member-borrows-form">
+    <h2 id="member-borrows-dialog-title"></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Jeu (ID)</th>
+          <th>Emprunté le</th>
+          <th>À rendre le</th>
+          <th>Rendu le</th>
+        </tr>
+      </thead>
+      <tbody id="member-borrows-tbody"></tbody>
+    </table>
+
+    <p class="form-error" role="alert" hidden></p>
+    <div class="actions">
+      <button type="button" data-cancel>Fermer</button>
+    </div>
+  </form>
+</dialog>
 
   <dialog id="borrow-dialog">
     <form method="dialog" id="borrow-form">

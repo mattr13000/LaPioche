@@ -83,6 +83,7 @@ struct MemberController: RouteCollection {
         else {
             throw Abort(.notFound, reason: "Member not found")
         }
+        
         let loans = try await Loan.query(on: req.db)
             .filter(\.$member.$id == member.requireID())
             .all()
