@@ -123,4 +123,12 @@ final class LoanTests: XCTestCase {
             })
         }
     }
+    
+    func testGetListOfOverdueLoans() async throws {
+        try await withApp { app in
+            try await app.test(.GET, "loans/overdue", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .ok)
+            })
+        }
+    }
 }

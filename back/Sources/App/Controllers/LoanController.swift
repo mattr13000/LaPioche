@@ -4,8 +4,18 @@ import Vapor
 struct LoanController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
         let loans = routes.grouped("loans")
+        loans.get("overdue", use: getOverdueLoans)
         loans.post(use: create)
         loans.post(":loanID", "return", use: update)
+    }
+    
+    @Sendable
+    func getOverdueLoans(req: Request) async throws -> Response {
+        let loans = try await Loan.query(on: req.db)
+            .filter(\.$returnedAt == nil)
+            .filter(\.$dueAt < Date())
+            .all()
+        return try await loans.map { $0.toDTO() }.encodeResponse(status: .ok, for: req)
     }
 
     @Sendable
