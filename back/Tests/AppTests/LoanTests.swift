@@ -98,7 +98,7 @@ final class LoanTests: XCTestCase {
                 loanID = try XCTUnwrap(loan.id)
             }
             
-            try await app.test(.PATCH, "loans/\(try XCTUnwrap(loanID))", afterResponse: { res async throws in
+            try await app.test(.POST, "loans/\(try XCTUnwrap(loanID))/return", afterResponse: { res async throws in
                 XCTAssertEqual(res.status, .ok)
             })
             
@@ -118,7 +118,7 @@ final class LoanTests: XCTestCase {
             let loan = try await insertLoan(app, gameID: gameID, memberID: memberID, borrowedAt: Date(), dueAt: Date(), returnedAt: Date())
             let loanID = try XCTUnwrap(loan.id)
             
-            try await app.test(.PATCH, "loans/\(loanID)", afterResponse: { res async throws in
+            try await app.test(.POST, "loans/\(loanID)/return", afterResponse: { res async throws in
                 XCTAssertEqual(res.status, .conflict)
             })
         }

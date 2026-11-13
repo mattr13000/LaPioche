@@ -5,7 +5,7 @@ struct LoanController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
         let loans = routes.grouped("loans")
         loans.post(use: create)
-        loans.patch(":loanID", use: update)
+        loans.post(":loanID", "return", use: update)
     }
 
     @Sendable

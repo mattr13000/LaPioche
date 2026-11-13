@@ -134,10 +134,6 @@ function openDeleteGameDialog(game) {
     deleteGameDialog.showModal();
 }
 
-bindSubmit(deleteGameDialog, deleteGameForm, () => 
-  api.deleteGame(deletedGame.id)
-);
-
 function gameCard(game) {
   const players =
     game.minPlayers === game.maxPlayers ? `${game.minPlayers}` : `${game.minPlayers} à ${game.maxPlayers}`;
@@ -150,6 +146,10 @@ function gameCard(game) {
     actions.append(button("Emprunter", () => openBorrowDialog(game), "primary"));
     actions.append(button("Modifier", () => openUpdateGameDialog(game), "primary"));
     actions.append(button("Supprimer", () => openDeleteGameDialog(game), "primary"));
+  }
+
+  if (!game.isAvailable) {
+    actions.append(button("Retourner", () => openReturnGameDialog(game), "primary"));
   }
   
   return el(
@@ -201,6 +201,25 @@ async function openBorrowDialog(game) {
     borrowDialog.showModal();
   });
 }
+
+// --- Retour
+
+const returnGameDialog = $("#return-game-dialog");
+const returnGameForm = $("#return-game-form");
+let returnedGame = null;
+
+
+function openReturnGameDialog(game) {
+    returnedGame = game;
+    $("#return-game-dialog-title").textContent = `Rendre « ${game.title} » ?`;
+    showFormError(returnGameDialog, null);
+    returnGameDialog.showModal();
+}
+
+bindSubmit(returnGameDialog, returnGameForm, async () => {
+  console.log(returnedGame)
+  await api.returnLoan(returnedGame.currentLoanID);
+});
 
 bindSubmit(borrowDialog, borrowForm, async (data) => {
   const loan = await api.borrow(borrowedGame.id, data.get("memberID"));
