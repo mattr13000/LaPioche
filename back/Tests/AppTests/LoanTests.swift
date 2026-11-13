@@ -124,10 +124,35 @@ final class LoanTests: XCTestCase {
         }
     }
     
-    func testGetListOfOverdueLoans() async throws {
+    func testGetListOfOverdueLoansExpectEmptyArray() async throws {
         try await withApp { app in
+            let game = try await createGame(app)
+            let member = try await createMember(app)
+            let gameID = try XCTUnwrap(game.id)
+            let memberID = try XCTUnwrap(member.id)
+            let _ = try await insertLoan(app, gameID: gameID, memberID: memberID, borrowedAt: Date(), dueAt: Date().addingTimeInterval(3600))
+            
             try await app.test(.GET, "loans/overdue", afterResponse: { res async throws in
                 XCTAssertEqual(res.status, .ok)
+                let loans = try res.content.decode([LoanDTO].self)
+                XCTAssertTrue(loans.isEmpty)
+            })
+        }
+    }
+    
+    func testGetListOfOverdueLoansExpectOneElementInArray() async throws {
+        
+        try await withApp { app in
+            let game = try await createGame(app)
+            let member = try await createMember(app)
+            let gameID = try XCTUnwrap(game.id)
+            let memberID = try XCTUnwrap(member.id)
+            let _ = try await insertLoan(app, gameID: gameID, memberID: memberID, borrowedAt: Date(), dueAt: Date().addingTimeInterval(-3600))
+            
+            try await app.test(.GET, "loans/overdue", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .ok)
+                let loans = try res.content.decode([LoanDTO].self)
+                XCTAssertTrue(loans.count == 1)
             })
         }
     }
