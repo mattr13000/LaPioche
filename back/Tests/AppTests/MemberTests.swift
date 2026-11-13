@@ -118,5 +118,21 @@ final class MemberTests: XCTestCase {
         }
     }
     
-
+    func testGetListOfMemberLoans() async throws {
+        try await withApp { app in
+            let member = try await createMember(app)
+            let id = try XCTUnwrap(member.id)
+            try await app.test(.GET, "members/\(id)/loans", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .ok)
+            })
+        }
+    }
+    
+    func testGetListOfMemberLoansWithBadId() async throws {
+        try await withApp { app in
+            try await app.test(.GET, "members/\(UUID())/loans", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .notFound)
+            })
+        }
+    }
 }
