@@ -47,7 +47,7 @@ struct MemberController: RouteCollection {
     @Sendable
     func update(req: Request) async throws -> Response {
         guard let memberID = req.parameters.get("memberID", as: UUID.self) else {
-            throw Abort(.badRequest, reason: "Invalid game id")
+            throw Abort(.badRequest, reason: "Invalid member id")
         }
         guard let member = try await Member.find(memberID, on: req.db)
         else {
@@ -56,11 +56,13 @@ struct MemberController: RouteCollection {
         
         let newMember = try req.content.decode(UpdateMemberDTO.self)
         
+        if member.email != newMember.email {
         let emailTaken = try await Member.query(on: req.db)
             .filter(\.$email == newMember.email)
             .count() > 0
-        guard !emailTaken else {
-            throw Abort(.conflict, reason: "A member with this email already exists")
+            guard !emailTaken else {
+                throw Abort(.conflict, reason: "A member with this email already exists")
+            }
         }
         
         member.name = newMember.name

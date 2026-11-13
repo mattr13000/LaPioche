@@ -127,7 +127,7 @@ const deleteGameForm = $("#delete-game-form");
 let deletedGame = null;
 
 
-function openDeleteDialog(game) {
+function openDeleteGameDialog(game) {
     deletedGame = game;
     $("#delete-game-dialog-title").textContent = `Supprimer « ${game.title} »`;
     showFormError(deleteGameDialog, null);
@@ -149,7 +149,7 @@ function gameCard(game) {
   if (game.isAvailable) {
     actions.append(button("Emprunter", () => openBorrowDialog(game), "primary"));
     actions.append(button("Modifier", () => openUpdateGameDialog(game), "primary"));
-    actions.append(button("Supprimer", () => openDeleteDialog(game), "primary"));
+    actions.append(button("Supprimer", () => openDeleteGameDialog(game), "primary"));
   }
   
   return el(
@@ -216,13 +216,16 @@ async function loadMembers() {
 }
 
 function memberRow(member) {
+  const actions = el("div", { class: "actions" });
+  actions.append(button("Modifier", () => openUpdateMemberDialog(member), "primary"));
+  actions.append(button("Supprimer", () => openDeleteMemberDialog(member), "primary"));
   return el(
     "li",
     { class: "row" },
-    el("div", { class: "row-main" }, el("p", {}, el("strong", {}, member.name)), el("p", { class: "meta" }, member.email)),
+    el("div", { class: "row-main" }, el("p", {}, el("strong", {}, member.name)), el("p", { class: "meta" }, member.email), actions),
   );
 }
-
+// --- ADD
 const memberDialog = $("#member-dialog");
 const memberForm = $("#member-form");
 
@@ -234,6 +237,46 @@ $("#add-member").addEventListener("click", () => {
 
 bindSubmit(memberDialog, memberForm, (data) =>
   api.createMember({ name: data.get("name").trim(), email: data.get("email").trim() }),
+);
+
+// --- UPDATE
+
+const updateMemberDialog = $("#update-member-dialog");
+const updateMemberForm = $("#update-member-form");
+let editedMember = null;
+
+function openUpdateMemberDialog(member) {
+  editedMember = member;
+  $('[name="update-name"]', updateMemberForm).value = member.name;
+  $('[name="update-email"]', updateMemberForm).value = member.email;
+  
+  showFormError(updateMemberDialog, null);
+  updateMemberDialog.showModal();
+}
+
+bindSubmit(updateMemberDialog, updateMemberForm, (data) =>
+  api.updateMember(editedMember.id, {
+    name: data.get("update-name").trim(),
+    email: data.get("update-email").trim(),
+  }),
+);
+
+// --- DELETE
+
+const deleteMemberDialog = $("#delete-member-dialog");
+const deleteMemberForm = $("#delete-member-form");
+let deletedMember = null;
+
+
+function openDeleteMemberDialog(member) {
+    deletedMember = member;
+    $("#delete-member-dialog-title").textContent = `Supprimer « ${member.name} »`;
+    showFormError(deleteMemberDialog, null);
+    deleteMemberDialog.showModal();
+}
+
+bindSubmit(deleteMemberDialog, deleteMemberForm, () => 
+  api.deleteMember(deletedMember.id)
 );
 
 refresh();
