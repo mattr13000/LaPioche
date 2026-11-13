@@ -82,11 +82,10 @@ struct MemberController: RouteCollection {
         
         let loanCount = try await Loan.query(on: req.db)
             .filter(\.$member.$id == member.requireID())
-            .filter(\.$returnedAt == nil)
             .count()
 
         guard loanCount == 0 else {
-            throw Abort(.conflict, reason: "This member still has active loans")
+            throw Abort(.conflict, reason: "A member with loans cannot be deleted")
         }
         
         try await member.delete(on: req.db)

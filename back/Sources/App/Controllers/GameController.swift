@@ -80,6 +80,15 @@ struct GameController: RouteCollection {
         else {
             throw Abort(.notFound, reason: "Game not found")
         }
+        
+        let loanCount = try await Loan.query(on: req.db)
+            .filter(\.$game.$id == game.requireID())
+            .count()
+
+        guard loanCount == 0 else {
+            throw Abort(.conflict, reason: "A game with loans cannot be deleted")
+        }
+        
         try await game.delete(on: req.db)
         return .noContent
     }
