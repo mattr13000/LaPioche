@@ -133,7 +133,7 @@ label.check input { width: auto; margin: 0; }
 .empty, .hint { color: var(--muted); }
 
 dialog {
-  width: min(440px, calc(100vw - 32px));
+  width: min(540px, calc(100vw - 32px));
   padding: 20px;
   border: 1px solid var(--border);
   border-radius: 10px;
