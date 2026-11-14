@@ -69,7 +69,7 @@ function bindSubmit(dialog, form, handler) {
 
 // --- Onglets ---------------------------------------------------------------
 
-const tabs = ["games", "members"];
+const tabs = ["games", "members", "overdue-loans"];
 
 function currentTab() {
   const name = location.hash.slice(1);
@@ -82,7 +82,29 @@ async function refresh() {
     $(`#${name}`).hidden = name !== tab;
     $(`[data-tab="${name}"]`).toggleAttribute("aria-current", name === tab);
   }
-  await run(tab === "games" ? loadGames : loadMembers);
+  await run(() => {
+    if (tab === "games") {
+      return loadGames();
+    } else if (tab === "members") {
+      return loadMembers();
+    } else if (tab === "overdue-loans") {
+      return loadOverdueLoans();
+    }
+  });
+}
+
+async function loadOverdueLoans() {
+  const overdueLoans = await api.listOverdueLoans();
+  $("#overdue-loans-empty").hidden = games.length > 0;
+  $("#overdue-loans-list").replaceChildren(...overdueLoans.map(overdueLoanRow));
+}
+
+function overdueLoanRow(loan) {
+  return el(
+    "li",
+    { class: "row" },
+    el("div", { class: "row-main" }, el("p", {}, el("strong", {}, loan.borrowedAt)), el("p", { class: "meta" }, loan.dueAt)),
+  );
 }
 
 window.addEventListener("hashchange", refresh);
@@ -123,7 +145,6 @@ bindSubmit(updateGameDialog, updateGameForm, (data) =>
 // --- DELETE
 
 const deleteGameDialog = $("#delete-game-dialog");
-const deleteGameForm = $("#delete-game-form");
 let deletedGame = null;
 
 
@@ -341,5 +362,7 @@ function openDeleteMemberDialog(member) {
 bindSubmit(deleteMemberDialog, deleteMemberForm, () => 
   api.deleteMember(deletedMember.id)
 );
+
+
 
 refresh();
