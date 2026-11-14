@@ -95,15 +95,30 @@ async function refresh() {
 
 async function loadOverdueLoans() {
   const overdueLoans = await api.listOverdueLoans();
-  $("#overdue-loans-empty").hidden = games.length > 0;
-  $("#overdue-loans-list").replaceChildren(...overdueLoans.map(overdueLoanRow));
+  const rows = await Promise.all(overdueLoans.map(overdueLoanRow))
+  console.log(overdueLoans)
+  $("#overdue-loans-empty").hidden = overdueLoans.length > 0;
+  $("#overdue-loans-list").replaceChildren(...rows);
 }
 
-function overdueLoanRow(loan) {
+async function overdueLoanRow(loan) {
+  const game = await api.showGame(loan.gameID);
+  const gameName = game.title;
+
+  const member = await api.showMember(loan.memberID);
+  const memberName = member.name;
+
+  const daysOverdue = Math.floor((new Date(loan.dueAt) - new Date(loan.borrowedAt)) / 86_400_000);
+
   return el(
     "li",
     { class: "row" },
-    el("div", { class: "row-main" }, el("p", {}, el("strong", {}, loan.borrowedAt)), el("p", { class: "meta" }, loan.dueAt)),
+    el("div", { class: "row-main" },
+      el("p", {}, el("strong", {}, gameName)),
+      el("p", {}, el("strong", {}, memberName)),
+      el("p", {}, el("strong", {}, formatDate(loan.borrowedAt))),
+      el("p", {}, el("strong", {},  `${daysOverdue} jours de retard`)),
+    )
   );
 }
 
