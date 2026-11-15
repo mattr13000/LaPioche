@@ -82,7 +82,6 @@ async function refresh() {
     $(`#${name}`).hidden = name !== tab;
     $(`[data-tab="${name}"]`).toggleAttribute("aria-current", name === tab);
   }
-
   await run(() => {
     if (tab === "games") {
       return loadGames();
@@ -378,5 +377,7 @@ function openDeleteMemberDialog(member) {
 bindSubmit(deleteMemberDialog, deleteMemberForm, () => 
   api.deleteMember(deletedMember.id)
 );
+
+
 
 refresh();
