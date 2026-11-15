@@ -82,6 +82,7 @@ async function refresh() {
     $(`#${name}`).hidden = name !== tab;
     $(`[data-tab="${name}"]`).toggleAttribute("aria-current", name === tab);
   }
+
   await run(() => {
     if (tab === "games") {
       return loadGames();
@@ -91,14 +92,18 @@ async function refresh() {
       return loadOverdueLoans();
     }
   });
+
+  const overdueLoans =  await api.listOverdueLoans();
+  const overdueLoansCount = overdueLoans.length;
+  $("#overdue-loans-count").textContent = overdueLoansCount;
 }
 
 async function loadOverdueLoans() {
   const overdueLoans = await api.listOverdueLoans();
   const rows = await Promise.all(overdueLoans.map(overdueLoanRow))
-  console.log(overdueLoans)
   $("#overdue-loans-empty").hidden = overdueLoans.length > 0;
-  $("#overdue-loans-list").replaceChildren(...rows);
+  $("#overdue-loans-table").hidden = overdueLoans.length === 0;
+  $("#overdue-loans-table-body").replaceChildren(...rows);
 }
 
 async function overdueLoanRow(loan) {
@@ -108,18 +113,14 @@ async function overdueLoanRow(loan) {
   const member = await api.showMember(loan.memberID);
   const memberName = member.name;
 
-  const daysOverdue = Math.floor((new Date(loan.dueAt) - new Date(loan.borrowedAt)) / 86_400_000);
+  const daysOverdue = Math.floor((Date.now() - new Date(loan.dueAt)) / 86_400_000);
 
-  return el(
-    "li",
-    { class: "row" },
-    el("div", { class: "row-main" },
-      el("p", {}, el("strong", {}, gameName)),
-      el("p", {}, el("strong", {}, memberName)),
-      el("p", {}, el("strong", {}, formatDate(loan.borrowedAt))),
-      el("p", {}, el("strong", {},  `${daysOverdue} jours de retard`)),
-    )
-  );
+  return el("tr", { class: "row-main" },
+      el("td", {}, el("strong", {}, gameName)),
+      el("td", {}, el("strong", {}, memberName)),
+      el("td", {}, el("strong", {}, formatDate(loan.dueAt))),
+      el("td", {}, el("strong", {},  `${daysOverdue} jours de retard`)),
+    );
 }
 
 window.addEventListener("hashchange", refresh);
@@ -377,7 +378,5 @@ function openDeleteMemberDialog(member) {
 bindSubmit(deleteMemberDialog, deleteMemberForm, () => 
   api.deleteMember(deletedMember.id)
 );
-
-
 
 refresh();
