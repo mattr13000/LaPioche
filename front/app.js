@@ -91,20 +91,37 @@ async function refresh() {
       return loadOverdueLoans();
     }
   });
+
+  const overdueLoans =  await api.listOverdueLoans();
+  const overdueLoansCount = overdueLoans.length;
+  const overdueLoansCountEl = $("#overdue-loans-count");
+  overdueLoansCountEl.textContent = overdueLoansCount;
+  overdueLoansCountEl.hidden = overdueLoansCount === 0;
 }
 
 async function loadOverdueLoans() {
   const overdueLoans = await api.listOverdueLoans();
-  $("#overdue-loans-empty").hidden = games.length > 0;
-  $("#overdue-loans-list").replaceChildren(...overdueLoans.map(overdueLoanRow));
+  const rows = await Promise.all(overdueLoans.map(overdueLoanRow))
+  $("#overdue-loans-empty").hidden = overdueLoans.length > 0;
+  $("#overdue-loans-table").hidden = overdueLoans.length === 0;
+  $("#overdue-loans-table-body").replaceChildren(...rows);
 }
 
-function overdueLoanRow(loan) {
-  return el(
-    "li",
-    { class: "row" },
-    el("div", { class: "row-main" }, el("p", {}, el("strong", {}, loan.borrowedAt)), el("p", { class: "meta" }, loan.dueAt)),
-  );
+async function overdueLoanRow(loan) {
+  const game = await api.showGame(loan.gameID);
+  const gameName = game.title;
+
+  const member = await api.showMember(loan.memberID);
+  const memberName = member.name;
+
+  const daysOverdue = Math.floor((Date.now() - new Date(loan.dueAt)) / 86_400_000);
+
+  return el("tr", {},
+      el("td", {}, gameName),
+      el("td", {}, memberName),
+      el("td", {}, formatDate(loan.dueAt)),
+      el("td", {}, `${daysOverdue} jours de retard`),
+    );
 }
 
 window.addEventListener("hashchange", refresh);
@@ -298,29 +315,27 @@ async function openMemberBorrowsDialog(m) {
     const loans = await api.getMemberLoans(member.id);
 
     if (loans.length === 0) {
-      memberBorrowsTbody.innerHTML = '<tr><td colspan="4">Aucun emprunt.</td></tr>';
+      memberBorrowsTbody.replaceChildren(el("tr", {}, el("td", { colspan: "4" }, "Aucun emprunt.")));
       return;
     }
 
-    const rows = await Promise.all(
-      loans.map(async (loan) => {
-        const game = await api.showGame(loan.gameID);
-        return `
-          <tr>
-            <td>${game.title}</td>
-            <td>${formatDate(loan.borrowedAt)}</td>
-            <td>${formatDate(loan.dueAt)}</td>
-            <td>${loan.returnedAt ? formatDate(loan.returnedAt) : "En cours"}</td>
-          </tr>
-        `;
-      })
-    );
-    memberBorrowsTbody.innerHTML = rows.join("");
+    const rows = await Promise.all(loans.map(memberBorrowRow));
+    memberBorrowsTbody.replaceChildren(...rows);
 
   } catch (err) {
-    memberBorrowsTbody.innerHTML = '<tr><td colspan="4">Erreur réseau.</td></tr>';
+    memberBorrowsTbody.replaceChildren(el("tr", {}, el("td", { colspan: "4" }, "Erreur réseau.")));
     showFormError(memberBorrowsDialog, null);
   }
+}
+
+async function memberBorrowRow(loan) {
+  const game = await api.showGame(loan.gameID);
+  return el("tr", {},
+    el("td", {}, game.title),
+    el("td", {}, formatDate(loan.borrowedAt)),
+    el("td", {}, formatDate(loan.dueAt)),
+    el("td", {}, loan.returnedAt ? formatDate(loan.returnedAt) : "En cours"),
+  );
 }
 
 // --- UPDATE

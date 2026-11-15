@@ -34,5 +34,7 @@ func configure(_ app: Application) async throws {
     app.migrations.add(CreateLoan())
     try await app.autoMigrate()
 
+    app.asyncCommands.use(SeedCommand(), as: "seed")
+
     try routes(app)
 }
