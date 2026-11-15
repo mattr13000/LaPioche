@@ -55,6 +55,8 @@ body {
 .topbar nav { display: flex; gap: 4px; flex: 1; }
 .topbar a { color: var(--text); text-decoration: none; padding: 6px 12px; border-radius: 6px; }
 .topbar nav a[aria-current] { background: var(--accent); color: var(--accent-text); }
+.topbar nav a.tab-alert { color: var(--late); font-weight: 600; }
+.topbar nav a.tab-alert[aria-current] { background: var(--late); color: var(--bg); }
 .docs-link { color: var(--muted) !important; font-size: 0.9rem; }
 
 main { max-width: 960px; margin: 0 auto; padding: 16px; }
@@ -131,6 +133,28 @@ label.check input { width: auto; margin: 0; }
 .count[hidden] { display: none; }
 
 .empty, .hint { color: var(--muted); }
+
+#overdue-loans-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+#overdue-loans-table th,
+#overdue-loans-table td {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+#overdue-loans-table thead th {
+  background: var(--bg);
+  color: var(--muted);
+}
+#overdue-loans-table td:last-child {
+  font-weight: 800;
+}
 
 dialog {
   width: min(540px, calc(100vw - 32px));
