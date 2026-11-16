@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>La Pioche - Ludothèque</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <header class="topbar">
     <h1>La Pioche</h1>
     <nav aria-label="Sections">
       <a href="#games" data-tab="games">Jeux</a>
       <a href="#members" data-tab="members">Adhérent·es</a>
-      <a href="#overdue-loans" data-tab="overdue-loans" class="tab-alert">Emprunts en retard <span id="overdue-loans-count" class="count" hidden></span></a>
+      <a href="#overdue-loans" data-tab="overdue-loans" class="tab-alert">Emprunts en retard <span
+          id="overdue-loans-count" class="count" hidden></span></a>
     </nav>
     <a class="docs-link" id="docs-link" href="http://localhost:8081/">Documentation API</a>
   </header>
@@ -21,9 +24,11 @@
     <section id="games" class="tab" hidden>
       <div class="section-head">
         <h2>Jeux</h2>
-        <button type="button" id="add-game" class="primary">Ajouter un jeu</button>
+        <button type="button" id="filter-games" class="primary">Filtrer les jeux</button>
+        <button type="button" id="add-game" class="primary">+ Ajouter un jeu</button>
       </div>
-      <p id="games-empty" class="empty" hidden>La ludothèque ne contient aucun jeu pour le moment. Cliquez sur « Ajouter un jeu » pour créer le premier.</p>
+      <p id="games-empty" class="empty" hidden>La ludothèque ne contient aucun jeu pour le moment. Cliquez sur « Ajouter
+        un jeu » pour créer le premier.</p>
       <ul id="games-list" class="cards"></ul>
     </section>
 
@@ -32,7 +37,8 @@
         <h2>Adhérent·es</h2>
         <button type="button" id="add-member" class="primary">Ajouter un·e adhérent·e</button>
       </div>
-      <p id="members-empty" class="empty" hidden>Aucun·e adhérent·e pour le moment. Cliquez sur « Ajouter un·e adhérent·e » pour créer le premier ou la première.</p>
+      <p id="members-empty" class="empty" hidden>Aucun·e adhérent·e pour le moment. Cliquez sur « Ajouter un·e
+        adhérent·e » pour créer le premier ou la première.</p>
       <ul id="members-list" class="rows"></ul>
     </section>
 
@@ -73,15 +79,43 @@
     </form>
   </dialog>
 
+  <dialog id="filter-game-dialog">
+    <form method="dialog" id="filter-game-form" novalidate>
+      <h2>Filtrer les jeux</h2>
+      <label>Titre <input name="filter-title"></label>
+      <div class="pair">
+        <label>Joueur·ses min <input type="number" name="filter-min-players" min="1" step="1"></label>
+        <label>Joueur·ses max <input type="number" name="filter-min-players" min="1" step="1"></label>
+      </div>
+      <label>Durée max (minutes) <input type="number" name="filter-max-duration" min="1" step="1"></label>
+      <label>
+        Disponibilité
+        <select name="filter-available">
+          <option value="">Tout les jeux</option>
+          <option value="true">Disponibles uniquement</option>
+          <option value="false">Empruntés uniquement</option>
+        </select>
+      </label>
+      <p class="form-error" role="alert" hidden></p>
+      <div class="actions">
+        <button type="button" data-cancel>Annuler</button>
+        <button type="submit" class="primary">Filtrer</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="update-game-dialog">
     <form method="dialog" id="update-game-form" novalidate>
       <h2>Modifier un jeu</h2>
       <label>Titre <input id="update-title" name="title" required></label>
       <div class="pair">
-        <label>Joueur·ses min <input type="number" id="update-minPlayers" name="minPlayers" min="1" step="1" required></label>
-        <label>Joueur·ses max <input type="number" id="update-maxPlayers" name="maxPlayers" min="1" step="1" required></label>
+        <label>Joueur·ses min <input type="number" id="update-minPlayers" name="minPlayers" min="1" step="1"
+            required></label>
+        <label>Joueur·ses max <input type="number" id="update-maxPlayers" name="maxPlayers" min="1" step="1"
+            required></label>
       </div>
-      <label>Durée (minutes) <input type="number" id="update-durationMinutes" name="durationMinutes" min="1" step="1" required></label>
+      <label>Durée (minutes) <input type="number" id="update-durationMinutes" name="durationMinutes" min="1" step="1"
+          required></label>
       <p class="form-error" role="alert" hidden></p>
       <div class="actions">
         <button type="button" data-cancel>Annuler</button>
@@ -128,27 +162,27 @@
     </form>
   </dialog>
 
-<dialog id="member-borrows-dialog">
-  <form method="dialog" id="member-borrows-form">
-    <h2 id="member-borrows-dialog-title"></h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Jeu (ID)</th>
-          <th>Emprunté le</th>
-          <th>À rendre le</th>
-          <th>Rendu le</th>
-        </tr>
-      </thead>
-      <tbody id="member-borrows-tbody"></tbody>
-    </table>
+  <dialog id="member-borrows-dialog">
+    <form method="dialog" id="member-borrows-form">
+      <h2 id="member-borrows-dialog-title"></h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Jeu (ID)</th>
+            <th>Emprunté le</th>
+            <th>À rendre le</th>
+            <th>Rendu le</th>
+          </tr>
+        </thead>
+        <tbody id="member-borrows-tbody"></tbody>
+      </table>
 
-    <p class="form-error" role="alert" hidden></p>
-    <div class="actions">
-      <button type="button" data-cancel>Fermer</button>
-    </div>
-  </form>
-</dialog>
+      <p class="form-error" role="alert" hidden></p>
+      <div class="actions">
+        <button type="button" data-cancel>Fermer</button>
+      </div>
+    </form>
+  </dialog>
 
   <dialog id="borrow-dialog">
     <form method="dialog" id="borrow-form">
@@ -193,4 +227,5 @@
 
   <script type="module" src="app.js"></script>
 </body>
+
 </html>
