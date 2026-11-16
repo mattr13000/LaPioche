@@ -52,6 +52,65 @@ final class GameTests: XCTestCase {
             })
         }
     }
+    
+    func testFilterWithNegativeMinPlayerReturnsBadRequest() async throws {
+        try await withApp { app in
+            try await app.test(.GET, "games?minPlayers=-1", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .badRequest)
+            })
+        }
+    }
+    
+    func testFilterWithCharactersInMinPlayerReturnsBadRequest() async throws {
+        try await withApp { app in
+            try await app.test(.GET, "games?minPlayers=toto", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .badRequest)
+            })
+        }
+    }
+    
+    func testFilterWithNegativeMaxPlayerReturnsBadRequest() async throws {
+        try await withApp { app in
+            try await app.test(.GET, "games?maxPlayers=-1", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .badRequest)
+            })
+        }
+    }
+    
+    func testFilterWithCharactersInMaxPlayerReturnsBadRequest() async throws {
+        try await withApp { app in
+            try await app.test(.GET, "games?maxPlayers=toto", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .badRequest)
+            })
+        }
+    }
+    
+    func testFilterMinPlayersGreaterThanMaxPlayersReturnBadRequest() async throws {
+        try await withApp { app in
+            try await app.test(.GET, "games?minPlayers=5&maxPlayers=3", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .badRequest)
+            })
+        }
+    }
+    
+    func testFilterWithNegativeMaxDurationReturnsBadRequest() async throws {
+        try await withApp { app in
+            try await app.test(.GET, "games?maxDuration=-1", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .badRequest)
+            })
+        }
+    }
+    
+    func testFilterWithCharactersInMaxDurationReturnsBadRequest() async throws {
+        try await withApp { app in
+            try await app.test(.GET, "games?maxDuration=toto", afterResponse: { res async throws in
+                XCTAssertEqual(res.status, .badRequest)
+            })
+        }
+    }
+    
+
+
 
     func testShowGame() async throws {
         try await withApp { app in
