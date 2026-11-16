@@ -8,6 +8,8 @@ $("#docs-link").href = API_URL;
 const dateFormat = new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" });
 const formatDate = (iso) => dateFormat.format(new Date(iso));
 
+var gameFilter = null
+
 // Construit un élément sans jamais passer par innerHTML : les données de
 // l'API (titres, noms) sont insérées comme du texte.
 function el(tag, props = {}, ...children) {
@@ -129,7 +131,7 @@ window.addEventListener("hashchange", refresh);
 // --- Jeux ------------------------------------------------------------------
 
 async function loadGames() {
-  const games = await api.listGames();
+  const games = await api.listGames(gameFilter);
   $("#games-empty").hidden = games.length > 0;
   $("#games-list").replaceChildren(...games.map(gameCard));
 }
@@ -157,6 +159,36 @@ bindSubmit(updateGameDialog, updateGameForm, (data) =>
     maxPlayers: Number(data.get("maxPlayers")),
     durationMinutes: Number(data.get("durationMinutes")),
   }),
+);
+
+// --- FILTER
+
+const filterGameDialog = $("#filter-game-dialog");
+const filterGameForm = $("#filter-game-form");
+
+$("#filter-games").addEventListener("click", () => {
+  filterGameForm.reset();
+  showFormError(filterGameDialog, null);
+  filterGameDialog.showModal();
+});
+
+bindSubmit(filterGameDialog, filterGameForm, async (data) => {
+    const params = new URLSearchParams();
+
+    const addIfPresent = (formKey, paramName = formKey) => {
+    const val = data.get(formKey)?.trim();
+      if (val) {
+        params.append(paramName, val);
+      }
+    };
+    addIfPresent("filter-title", "title");
+    addIfPresent("filter-min-players", "minPlayers");
+    addIfPresent("filter-max-players", "maxPlayers");
+    addIfPresent("filter-max-duration", "maxDuration");
+    addIfPresent("filter-available", "isAvailable");
+    console.log(params)
+    gameFilter = params
+  }
 );
 
 // --- DELETE

@@ -107,7 +107,10 @@ async function request(method, path, body) {
 }
 
 export const api = {
-  listGames: () => request("GET", "/games"),
+  listGames: (params) => {
+    const query = params?.toString();
+    return request("GET", query ? `/games?${query}` : "/games");
+  },
   createGame: (game) => request("POST", "/games", game),
   updateGame: (gameID, game) => request("PUT", `/games/${gameID}`, game),
   showGame: (gameID) => request("GET", `/games/${gameID}`),
