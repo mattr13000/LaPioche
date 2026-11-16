@@ -7,6 +7,7 @@ struct LoanController: RouteCollection {
         loans.get("overdue", use: getOverdueLoans)
         loans.post(use: create)
         loans.post(":loanID", "return", use: update)
+        
     }
     
     @Sendable
