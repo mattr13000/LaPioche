@@ -17,6 +17,6 @@ struct GameFilter: Content, Validatable {
     static func validations(_ validations: inout Validations) {
         validations.add("minPlayers", as: Int.self, is: .range(1...), required: false)
         validations.add("maxPlayers", as: Int.self, is: .range(1...), required: false)
-        validations.add("durationMinutes", as: Int.self, is: .range(1...), required: false)
+        validations.add("maxDuration", as: Int.self, is: .range(1...), required: false)
     }
 }

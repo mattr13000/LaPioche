@@ -43,7 +43,13 @@ struct GameController: RouteCollection {
         let filteredGames = try await query
             .all()
             
-        return filteredGames.map { $0.toDTO() }
+        var dtos = filteredGames.map { $0.toDTO() }
+        
+        if let isAvailable = filters.isAvailable {
+            dtos = dtos.filter { $0.isAvailable == isAvailable }
+        }
+        
+        return dtos
     }
 
     @Sendable
