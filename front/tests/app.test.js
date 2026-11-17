@@ -28,14 +28,13 @@ test("only an available game offers Borrow", async () => {
 test("with no game, a message invites to add one", async () => {
   const app = await mountApp({ "GET /games": [] });
   await waitFor(() => !app.$("#games-empty").hidden);
-  assertIncludes(app.$("#games-empty").textContent, "ne contient aucun jeu");
-  assertIncludes(app.$("#games-empty").textContent, "Ajouter un jeu");
+  assertIncludes(app.$("#games-empty").textContent, "La ludothèque est vide, ajoutez un jeu");
 });
 
 test("adding a game posts the form then reloads the list", async () => {
   const app = await mountApp({ "GET /games": [catan], "POST /games": [201, { ...catan, id: "g3", title: "Dixit" }] });
   await waitFor(() => app.$$("#games-list .card").length === 1);
-  app.click("Ajouter un jeu");
+  app.click("+ Ajouter un jeu");
   const form = app.$("#game-form");
   form.elements.title.value = "  Dixit ";
   form.elements.minPlayers.value = "3";
@@ -58,7 +57,7 @@ test("a validation error is shown in French and the dialog stays open", async ()
     "POST /games": [400, { error: true, reason: "title is empty, durationMinutes is less than minimum of 1" }],
   });
   await waitFor(() => !app.$("#games-empty").hidden, "la page est chargée");
-  app.click("Ajouter un jeu");
+  app.click("+ Ajouter un jeu");
   app.$("#game-form").requestSubmit();
   await waitFor(() => !app.$("#game-dialog .form-error").hidden, "le message d'erreur");
   assertEqual(app.$("#game-dialog .form-error").textContent, "Le titre est obligatoire. La durée doit être d'au moins 1.");
@@ -102,7 +101,7 @@ test("members tab lists the members", async () => {
 test("with no member, a message invites to add one", async () => {
   const app = await mountApp({ "GET /members": [] }, { hash: "#members" });
   await waitFor(() => !app.$("#members-empty").hidden);
-  assertIncludes(app.$("#members-empty").textContent, "Ajouter un·e adhérent·e");
+  assertIncludes(app.$("#members-empty").textContent, "Aucun adhérent·e pour le moment");
 });
 
 test("adding a member posts the form", async () => {

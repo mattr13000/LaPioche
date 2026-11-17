@@ -54,6 +54,87 @@ test("deleteGame calls DELETE /games/:id and returns no content", async () => {
   assertEqual(result, null);
 });
 
+// showGame: (gameID) => request("GET", `/games/${gameID}`)
+
+test("showGame calls GET /games/:id and returns one game", async () => {
+  const { fetch, calls } = fakeApi({ "GET /games/g1": [200, { id: "g1", title: "Catan" }] });
+  const game = await withFakeFetch(fetch, () => api.showGame("g1"));
+  assertEqual(`${calls[0].method} ${calls[0].path}`, "GET /games/g1");
+  assertEqual(game.id, "g1");
+});
+
+// listMembers: () => request("GET", "/members")
+
+test("listMembers calls GET /members", async () => {
+  const { fetch, calls } = fakeApi({ "GET /members": [] });
+  await withFakeFetch(fetch, () => api.listMembers());
+  assertEqual(`${calls[0].method} ${calls[0].path}`, "GET /members");
+});
+
+// createMember: (member) => request("POST", "/members", member)
+
+test("createMember sends a JSON POST", async () => {
+  const { fetch, calls } = fakeApi({ "POST /members": [201, { id: "1" }] });
+  const member = { id: "m1", name: "Camille", email: "camille@example.com" };
+  const created = await withFakeFetch(fetch, () => api.createMember(member));
+  assertEqual(calls[0].method, "POST");
+  assertEqual(calls[0].body, member);
+  assertEqual(created.id, "1");
+});
+
+// updateMember: (memberID, member) => request("PUT", `/members/${memberID}`, member)
+
+test("updateMember sends a JSON PUT", async () => {
+  const { fetch, calls } = fakeApi({ "PUT /members/m1": [200, { id: "m1", name: "Camille Updated" }] });
+  const payload = { name: "Camille Updated", email: "camille@example.com" };
+  const updated = await withFakeFetch(fetch, () => api.updateMember("m1", payload));
+  assertEqual(`${calls[0].method} ${calls[0].path}`, "PUT /members/m1");
+  assertEqual(calls[0].body, payload);
+  assertEqual(updated.name, "Camille Updated");
+});
+
+// showMember: (memberID) => request("GET", `/members/${memberID}`)
+
+test("showMember calls GET /members/:id", async () => {
+  const { fetch, calls } = fakeApi({ "GET /members/m1": [200, { id: "m1", name: "Camille" }] });
+  const member = await withFakeFetch(fetch, () => api.showMember("m1"));
+  assertEqual(`${calls[0].method} ${calls[0].path}`, "GET /members/m1");
+  assertEqual(member.id, "m1");
+});
+
+// deleteMember: (memberID) => request("DELETE", `/members/${memberID}`)
+
+test("deleteMember calls DELETE /members/:id and returns no content", async () => {
+  const { fetch, calls } = fakeApi({ "DELETE /members/m1": [204] });
+  const result = await withFakeFetch(fetch, () => api.deleteMember("m1"));
+  assertEqual(`${calls[0].method} ${calls[0].path}`, "DELETE /members/m1");
+  assertEqual(result, null);
+});
+
+// getMemberLoans: (memberID) => request("GET", `/members/${memberID}/loans`)
+
+test("getMemberLoans calls GET /members/:id/loans", async () => {
+  const { fetch, calls } = fakeApi({ "GET /members/m1/loans": [] });
+  await withFakeFetch(fetch, () => api.getMemberLoans("m1"));
+  assertEqual(`${calls[0].method} ${calls[0].path}`, "GET /members/m1/loans");
+});
+
+// listOverdueLoans: () => request("GET", `/loans/overdue`)
+
+test("listOverdueLoans calls GET /loans/overdue", async () => {
+  const { fetch, calls } = fakeApi({ "GET /loans/overdue": [] });
+  await withFakeFetch(fetch, () => api.listOverdueLoans());
+  assertEqual(`${calls[0].method} ${calls[0].path}`, "GET /loans/overdue");
+});
+
+// returnLoan: (loanID) => request("POST", `/loans/${loanID}/return`)
+
+test("returnLoan sends a POST and returns no content", async () => {
+  const { fetch, calls } = fakeApi({ "POST /loans/l1/return": [204] });
+  const result = await withFakeFetch(fetch, () => api.returnLoan("l1"));
+  assertEqual(`${calls[0].method} ${calls[0].path}`, "POST /loans/l1/return");
+  assertEqual(result, null);
+});
 
 // --- erreurs
 
