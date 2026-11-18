@@ -172,6 +172,17 @@ $("#filter-games").addEventListener("click", () => {
   filterGameDialog.showModal();
 });
 
+
+document.querySelector("#filter-available").addEventListener("change", (event) => {
+  const isAvailable = event.target.checked;
+  const params = new URLSearchParams();
+  if (isAvailable) {
+    params.append("isAvailable", "true");
+  }
+  gameFilter = params;
+  loadGames();
+});
+
 bindSubmit(filterGameDialog, filterGameForm, async (data) => {
     const params = new URLSearchParams();
 
@@ -186,7 +197,6 @@ bindSubmit(filterGameDialog, filterGameForm, async (data) => {
     addIfPresent("filter-max-players", "maxPlayers");
     addIfPresent("filter-max-duration", "maxDuration");
     addIfPresent("filter-available", "isAvailable");
-    console.log(params)
     gameFilter = params
   }
 );

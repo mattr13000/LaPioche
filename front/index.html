@@ -28,6 +28,13 @@
         <button type="button" id="add-game" class="primary">+ Ajouter un jeu</button>
       </div>
       <p id="games-empty" class="empty" hidden>La ludothèque est vide, ajoutez un jeu</p>
+    <div class="switch-container">
+      <label class="switch">
+        <input id="filter-available" type="checkbox">
+        <span class="slider round"></span>
+      </label>
+      <label for="filter-available" class="switch-label">Filtrer selon les jeux disponibles</label>
+    </div>
       <ul id="games-list" class="cards"></ul>
     </section>
 
@@ -86,14 +93,6 @@
         <label>Joueur·ses max <input type="number" name="filter-max-players" min="1" step="1"></label>
       </div>
       <label>Durée max (minutes) <input type="number" name="filter-max-duration" min="1" step="1"></label>
-      <label>
-        Disponibilité
-        <select name="filter-available">
-          <option value="">Tout les jeux</option>
-          <option value="true">Disponibles uniquement</option>
-          <option value="false">Empruntés uniquement</option>
-        </select>
-      </label>
       <p class="form-error" role="alert" hidden></p>
       <div class="actions">
         <button type="button" data-cancel>Annuler</button>
