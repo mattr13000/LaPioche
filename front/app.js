@@ -194,6 +194,7 @@ bindSubmit(filterGameDialog, filterGameForm, async (data) => {
 // --- DELETE
 
 const deleteGameDialog = $("#delete-game-dialog");
+const deleteGameForm = $("#delete-game-form");
 let deletedGame = null;
 
 
@@ -203,6 +204,10 @@ function openDeleteGameDialog(game) {
     showFormError(deleteGameDialog, null);
     deleteGameDialog.showModal();
 }
+
+bindSubmit(deleteGameDialog, deleteGameForm, () =>
+  api.deleteGame(deletedGame.id)
+);
 
 function gameCard(game) {
   const players =
@@ -362,11 +367,13 @@ async function openMemberBorrowsDialog(m) {
 
 async function memberBorrowRow(loan) {
   const game = await api.showGame(loan.gameID);
+  const isOverdue = !loan.returnedAt && new Date(loan.dueAt) < new Date();
+  const status = loan.returnedAt ? formatDate(loan.returnedAt) : isOverdue ? "En retard" : "En cours";
   return el("tr", {},
     el("td", {}, game.title),
     el("td", {}, formatDate(loan.borrowedAt)),
     el("td", {}, formatDate(loan.dueAt)),
-    el("td", {}, loan.returnedAt ? formatDate(loan.returnedAt) : "En cours"),
+    el("td", {}, status),
   );
 }
 
