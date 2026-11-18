@@ -194,6 +194,7 @@ bindSubmit(filterGameDialog, filterGameForm, async (data) => {
 // --- DELETE
 
 const deleteGameDialog = $("#delete-game-dialog");
+const deleteGameForm = $("#delete-game-form");
 let deletedGame = null;
 
 
@@ -203,6 +204,10 @@ function openDeleteGameDialog(game) {
     showFormError(deleteGameDialog, null);
     deleteGameDialog.showModal();
 }
+
+bindSubmit(deleteGameDialog, deleteGameForm, () =>
+  api.deleteGame(deletedGame.id)
+);
 
 function gameCard(game) {
   const players =

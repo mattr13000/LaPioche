@@ -64,7 +64,142 @@ test("a validation error is shown in French and the dialog stays open", async ()
   assertTrue(app.$("#game-dialog").open, "la boîte devrait rester ouverte");
 });
 
+// --- Update jeu
+
+test("updating a game pre-fills the form, sends PUT and closes dialog", async () => {
+  const app = await mountApp({
+    "GET /games": [catan],
+    "PUT /games/g1": [200, { ...catan, title: "Les Colons de Catane", maxPlayers: 6 }],
+  });
+
+  await waitFor(() => app.$$("#games-list .card").length === 1);
+  app.click("Modifier", app.$("#games-list .card"));
+
+  const form = app.$("#update-game-form");
+  assertTrue(app.$("#update-game-dialog").open, "la boîte de modification devrait être ouverte");
+  assertEqual(form.elements.title.value, "Catan");
+  assertEqual(form.elements.minPlayers.value, "3");
+  assertEqual(form.elements.maxPlayers.value, "4");
+  assertEqual(form.elements.durationMinutes.value, "90");
+
+  form.elements.title.value = "  Les Colons de Catane ";
+  form.elements.maxPlayers.value = "6";
+  form.requestSubmit();
+
+  await waitFor(() => app.calls.some((call) => call.method === "PUT" && call.path === "/games/g1"), "l'appel PUT /games/g1");
+  assertEqual(app.calls.find((call) => call.method === "PUT").body, {
+    title: "Les Colons de Catane",
+    minPlayers: 3,
+    maxPlayers: 6,
+    durationMinutes: 90,
+  });
+  await waitFor(() => !app.$("#update-game-dialog").open, "la boîte se ferme");
+});
+
+test("updating a game with invalid data shows error in French and keeps dialog open", async () => {
+  const app = await mountApp({
+    "GET /games": [catan],
+    "PUT /games/g1": [400, { error: true, reason: "title is empty" }],
+  });
+
+  await waitFor(() => app.$$("#games-list .card").length === 1);
+  app.click("Modifier", app.$("#games-list .card"));
+
+  const form = app.$("#update-game-form");
+  form.elements.title.value = "";
+  form.requestSubmit();
+
+  await waitFor(() => !app.$("#update-game-dialog .form-error").hidden, "le message d'erreur");
+  assertEqual(app.$("#update-game-dialog .form-error").textContent, "Le titre est obligatoire.");
+  assertTrue(app.$("#update-game-dialog").open, "la boîte devrait rester ouverte");
+});
+
+// --- Filtre jeux
+
+test("filtering games reloads the list with query parameters", async () => {
+  const catan = { id: "g1", title: "Catan", minPlayers: 3, maxPlayers: 4, durationMinutes: 90, isAvailable: true };
+  const query = "title=Catan&minPlayers=3&isAvailable=true";
+  const app = await mountApp({
+    "GET /games": [catan],
+    [`GET /games?${query}`]: [catan],
+    "GET /loans/overdue": [],
+  });
+
+  await waitFor(() => app.$$("#games-list .card").length === 1);
+  app.$("#filter-games").click();
+
+  const form = app.$("#filter-game-form");
+  assertTrue(app.$("#filter-game-dialog").open, "la boîte de filtre devrait être ouverte");
+
+  form.elements["filter-title"].value = "  Catan ";
+  form.elements["filter-min-players"].value = "3";
+  form.elements["filter-available"].value = "true";
+  form.requestSubmit();
+
+  await waitFor(() => !app.$("#filter-game-dialog").open, "la boîte de filtre se ferme");
+  await waitFor(
+    () => app.calls.some((call) => call.method === "GET" && call.path === "/games" && call.search !== ""),
+    "l'appel GET /games filtré",
+  );
+
+  const filteredCall = app.calls.find((call) => call.method === "GET" && call.path === "/games" && call.search !== "");
+  assertEqual(filteredCall.search, `?${query}`);
+});
+
+// --- Supprimer jeu
+
+test("deleting a game asks confirmation, sends DELETE and closes dialog", async () => {
+  const catan = { id: "g1", title: "Catan", minPlayers: 3, maxPlayers: 4, durationMinutes: 90, isAvailable: true };
+  const app = await mountApp({
+    "GET /games": [catan],
+    "DELETE /games/g1": [204],
+    "GET /loans/overdue": [],
+  });
+
+  await waitFor(() => app.$$("#games-list .card").length === 1);
+  app.click("Supprimer", app.$("#games-list .card"));
+
+  const dialog = app.$("#delete-game-dialog");
+  assertTrue(dialog.open, "la boîte de suppression devrait être ouverte");
+  assertEqual(app.$("#delete-game-dialog-title").textContent, "Supprimer « Catan »");
+
+  app.$("#delete-game-form").requestSubmit();
+
+  await waitFor(() => app.calls.some((call) => call.method === "DELETE" && call.path === "/games/g1"), "l'appel DELETE /games/g1");
+  await waitFor(() => !dialog.open, "la boîte de suppression se ferme");
+});
+
+test("deleting a game that is on loan shows error and keeps dialog open", async () => {
+  const catan = { id: "g1", title: "Catan", minPlayers: 3, maxPlayers: 4, durationMinutes: 90, isAvailable: true };
+  const app = await mountApp({
+    "GET /games": [catan],
+    "DELETE /games/g1": [409, { error: true, reason: "Game is already on loan" }],
+    "GET /loans/overdue": [],
+  });
+
+  await waitFor(() => app.$$("#games-list .card").length === 1);
+  app.click("Supprimer", app.$("#games-list .card"));
+
+  app.$("#delete-game-form").requestSubmit();
+
+  await waitFor(() => !app.$("#delete-game-dialog .form-error").hidden, "le message d'erreur");
+  assertEqual(app.$("#delete-game-dialog .form-error").textContent, "Ce jeu est déjà emprunté : il faut d'abord le rendre.");
+  assertTrue(app.$("#delete-game-dialog").open, "la boîte devrait rester ouverte");
+});
+
 // --- Emprunts
+
+test("borrowed games only show the Retourner button", async () => {
+  const borrowedGame = { id: "g2", title: "Dixit", minPlayers: 3, maxPlayers: 6, durationMinutes: 30, isAvailable: false };
+  const app = await mountApp({ "GET /games": [borrowedGame] });
+
+  await waitFor(() => app.$$("#games-list .card").length === 1);
+  const card = app.$("#games-list .card");
+  const buttons = [...card.querySelectorAll("button")].map((b) => b.textContent.trim());
+
+  assertEqual(buttons, ["Retourner"]);
+  assertIncludes(card.textContent, "Emprunté");
+});
 
 test("borrowing a game sends the game and the chosen member", async () => {
   const app = await mountApp({
