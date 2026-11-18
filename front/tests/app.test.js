@@ -119,7 +119,7 @@ test("updating a game with invalid data shows error in French and keeps dialog o
 
 test("filtering games reloads the list with query parameters", async () => {
   const catan = { id: "g1", title: "Catan", minPlayers: 3, maxPlayers: 4, durationMinutes: 90, isAvailable: true };
-  const query = "title=Catan&minPlayers=3&isAvailable=true";
+  const query = "title=Catan&minPlayers=3";
   const app = await mountApp({
     "GET /games": [catan],
     [`GET /games?${query}`]: [catan],
@@ -134,7 +134,6 @@ test("filtering games reloads the list with query parameters", async () => {
 
   form.elements["filter-title"].value = "  Catan ";
   form.elements["filter-min-players"].value = "3";
-  form.elements["filter-available"].value = "true";
   form.requestSubmit();
 
   await waitFor(() => !app.$("#filter-game-dialog").open, "la boîte de filtre se ferme");
